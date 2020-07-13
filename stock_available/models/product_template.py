@@ -10,7 +10,6 @@ from odoo.addons.stock.models.product import OPERATORS
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    @api.multi
     @api.depends('product_variant_ids.immediately_usable_qty',
                  'product_variant_ids.potential_qty')
     def _compute_available_quantities(self):
@@ -20,7 +19,6 @@ class ProductTemplate(models.Model):
                 if key in product._fields:
                     product[key] = value
 
-    @api.multi
     def _compute_available_quantities_dict(self):
         variants_dict, _ = self.mapped(
             'product_variant_ids')._compute_available_quantities_dict()

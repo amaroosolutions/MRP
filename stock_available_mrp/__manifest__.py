@@ -12,7 +12,7 @@
         'mrp'
     ],
     'demo': [
-        'demo/mrp_data.xml',
+       # 'demo/mrp_data.xml',
     ],
     'license': 'AGPL-3',
     'installable': True,

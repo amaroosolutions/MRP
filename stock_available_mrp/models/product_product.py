@@ -5,22 +5,18 @@ from collections import Counter
 from odoo import api, fields, models
 from odoo.fields import first
 
-
 class ProductProduct(models.Model):
-
     _inherit = 'product.product'
 
     bom_id = fields.Many2one(
         'mrp.bom',
         compute='_compute_bom_id',
-        string='BOM'
-    )
-
+        string='BOM', store=True)
+    
     @api.depends('virtual_available', 'bom_id', 'bom_id.product_qty')
     def _compute_available_quantities(self):
         super(ProductProduct, self)._compute_available_quantities()
 
-    @api.multi
     def _get_bom_id_domain(self):
         """
         Real multi domain
@@ -34,7 +30,6 @@ class ProductProduct(models.Model):
             ('product_tmpl_id', 'in', self.mapped('product_tmpl_id.id'))
         ]
 
-    @api.multi
     @api.depends('product_tmpl_id')
     def _compute_bom_id(self):
         bom_obj = self.env['mrp.bom']
@@ -50,12 +45,14 @@ class ProductProduct(models.Model):
             )
             if product_boms:
                 product.bom_id = first(product_boms)
+            else:
+                product = False
 
-    @api.multi
     def _compute_available_quantities_dict(self):
         res, stock_dict = super(ProductProduct,
                                 self)._compute_available_quantities_dict()
         # compute qty for product with bom
+        
         product_with_bom = self.filtered('bom_id')
 
         if not product_with_bom:
@@ -91,6 +88,7 @@ class ProductProduct(models.Model):
                 component_products}
 
         for product in product_with_bom:
+            print ("product",product)
             # Need by product (same product can be in many BOM lines/levels)
             exploded_components = exploded_boms[product.id]
             component_needs = product._get_components_needs(
@@ -124,7 +122,6 @@ class ProductProduct(models.Model):
 
         return res, stock_dict
 
-    @api.multi
     def _explode_boms(self):
         """
         return a dict by product_id of exploded bom lines
@@ -135,7 +132,6 @@ class ProductProduct(models.Model):
             exploded_boms[rec.id] = rec.bom_id.explode(rec, 1.0)[1]
         return exploded_boms
 
-    @api.model
     def _get_components_needs(self, exploded_components):
         """ Return the needed qty of each compoments in the exploded_components
 

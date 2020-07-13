@@ -15,7 +15,6 @@ class ProductProduct(models.Model):
     """
     _inherit = 'product.product'
 
-    @api.multi
     def _compute_available_quantities_dict(self):
         stock_dict = self._compute_quantities_dict(
             self._context.get('lot_id'),
@@ -32,7 +31,6 @@ class ProductProduct(models.Model):
             }
         return res, stock_dict
 
-    @api.multi
     @api.depends('virtual_available')
     def _compute_available_quantities(self):
         res, _ = self._compute_available_quantities_dict()
